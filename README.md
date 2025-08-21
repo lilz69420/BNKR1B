@@ -329,58 +329,5 @@ A real time cash to banker converter. V1.1
 </html>
 export default {
   async fetch(request, env) {
-    // Route all requests to the single global counter object
-    const id = env.Counter.idFromName("global");
-    const stub = env.Counter.get(id);
-    return stub.fetch(request);
+
   },
-};
-
-export class Counter {
-  constructor(state, env) {
-    this.state = state;
-    this.env = env;
-  }
-
-  async fetch(request) {
-    const url = new URL(request.url);
-
-    // CORS preflight
-    if (request.method === "OPTIONS") {
-      return this._cors();
-    }
-
-    if (url.pathname === "/hit" && request.method === "POST") {
-      let count = (await this.state.storage.get("count")) || 0;
-      count++;
-      await this.state.storage.put("count", count);
-      return this._json({ views: count });
-    }
-
-    if (url.pathname === "/count" && request.method === "GET") {
-      const count = (await this.state.storage.get("count")) || 0;
-      return this._json({ views: count });
-    }
-
-    return new Response("Not found", { status: 404 });
-  }
-
-  _json(data) {
-    return new Response(JSON.stringify(data), {
-      headers: {
-        "content-type": "application/json",
-        "access-control-allow-origin": "*",
-      },
-    });
-  }
-
-  _cors() {
-    return new Response(null, {
-      headers: {
-        "access-control-allow-origin": "*",
-        "access-control-allow-methods": "GET,POST,OPTIONS",
-        "access-control-allow-headers": "content-type",
-      },
-    });
-  }
-}
